@@ -98,9 +98,30 @@
         text-shadow: 0 0 20px #fff, 0 0 40px #d0bfff;
       }
     }
+
+    /* Overlay styles */
+    #clickOverlay {
+      position: fixed;
+      top: 0; left: 0; right: 0; bottom: 0;
+      background: rgba(28, 0, 51, 0.9);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 2rem;
+      font-weight: bold;
+      z-index: 9999;
+      cursor: pointer;
+      user-select: none;
+      text-align: center;
+      padding: 0 20px;
+    }
   </style>
 </head>
 <body>
+
+  <!-- Overlay that asks for click -->
+  <div id="clickOverlay">Please click on your screen</div>
 
   <h1>Join Our Discord Servers</h1>
 
@@ -111,7 +132,7 @@
 
   <div class="volume-control">
     <label class="volume-label" for="volumeSlider">🔊 Volume:</label>
-    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="1">
+    <input type="range" id="volumeSlider" min="0" max="1" step="0.01" value="0.5">
   </div>
 
   <audio id="backgroundMusic" loop>
@@ -122,21 +143,24 @@
   <script>
     const music = document.getElementById('backgroundMusic');
     const volumeSlider = document.getElementById('volumeSlider');
+    const overlay = document.getElementById('clickOverlay');
 
-    // Set volume slider's initial value
+    // Set initial volume to 50%
     music.volume = volumeSlider.value;
 
-    // Volume control
     volumeSlider.addEventListener('input', () => {
       music.volume = volumeSlider.value;
     });
 
-    // Wait for any user interaction before playing music (fixes autoplay block)
-    window.addEventListener('click', () => {
-      if (music.paused) {
-        music.play().catch(err => console.log("Autoplay blocked:", err));
-      }
-    }, { once: true }); // run only on first click
+    function startMusic() {
+      music.play().catch(err => console.log("Autoplay blocked:", err));
+      overlay.style.display = 'none';
+      window.removeEventListener('click', startMusic);
+      overlay.removeEventListener('click', startMusic);
+    }
+
+    window.addEventListener('click', startMusic, { once: true });
+    overlay.addEventListener('click', startMusic, { once: true });
   </script>
 
 </body>
